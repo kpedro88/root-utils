@@ -209,15 +209,15 @@ class PlotFactory:
         self.emptylinhistos = {}
         self.emptyloghistos = {}
 
-    def process(self, dryrun=False, verbose=1):
+    def process(self, mode='plot', verbose=1):
 
-        if dryrun:
+        if mode=='dryrun':
 
             print('\nthis is a dry run, these samples are registered:\n')
             for s in self.stacksamples + self.markersamples + self.linesamples:
                 print(s.name)
 
-        else:
+        elif mode=='plot':
 
             if self.width is None:
                 if len(self.ratios) > 0:
@@ -242,6 +242,36 @@ class PlotFactory:
             self._style_histos(verbose=verbose)
             self._draw_plots(verbose=verbose)
             self._save_histos()
+
+        elif mode=='valid':
+            self._complete_dfs_and_weights()
+            self._get_histos()
+            self._make_ratios(verbose=verbose)
+
+            def get_contents(hist):
+                return [hist.GetBinContent(i) for i in range(1,hist.GetNbinsX())]
+
+            if len(self.ratios)==0:
+                raise RuntimeError("No ratios defined for validation comparison")
+            comp = {}
+            for v in self.variables:
+                for r in self.ratios:
+                    vrname = v + r
+                    if r.hidden: continue
+                    if self.ratiohistos[vrname] is None: continue
+                    comp[vrname] = get_contents(self.ratiohistos[vrname])
+
+            valid = True
+            for key,val in comp.items():
+                if not all([x==1.0 for x in val]):
+                    valid = False
+                    print("Difference in {}: {}".format(
+                        key,
+                        ', '.join(["{:.3g}".format(v) for v in val]),
+                    ))
+            if not valid:
+                sys.exit(1)
+
 
     def add_variables(self, variablelist):
         """
@@ -304,12 +334,12 @@ class PlotFactory:
 
     def _get_histos(self):
 
-        print('\n# Get Histos')
+        #print('\n# Get Histos')
 
         makeflat = {}
         for s in self.stacksamples + self.markersamples + self.linesamples:
 
-            print(s)
+            #print(s)
 
             if isinstance(s, TreeSample) and not s.usehistocache:
 
@@ -357,7 +387,7 @@ class PlotFactory:
                             )
 
                 # then trigger the filling of the histos
-                s.df.Report().Print()
+                #s.df.Report().Print()
 
                 # get the pointer to the real histogram instead of the RResultPtr
                 for v in self.variables:
@@ -615,15 +645,15 @@ class PlotFactory:
             if iv == 0:
                 for s in self.markersamples[::-1]:
                     if len(s.title) > 0 and s.group is None:
-                        self.legend.AddEntry(self.histos[v + s], s.title, 'pe')
+                        if self.legend: self.legend.AddEntry(self.histos[v + s], s.title, 'pe')
 
                 for s in self.stacksamples[::-1]:
                     if len(s.title) > 0 and s.group is None:
-                        self.legend.AddEntry(self.histos[v + s], s.title, 'f')
+                        if self.legend: self.legend.AddEntry(self.histos[v + s], s.title, 'f')
 
                 for s in self.linesamples:
                     if len(s.title) > 0 and s.group is None:
-                        self.legend.AddEntry(self.histos[v + s], s.title, 'l')
+                        if self.legend: self.legend.AddEntry(self.histos[v + s], s.title, 'l')
 
         if any([s.usehistocache for s in self.stacksamples + self.markersamples + self.linesamples if isinstance(s, TreeSample)]):
             print('\n5 seconds to check histo cache files')
@@ -632,7 +662,7 @@ class PlotFactory:
 
     def _make_ratios(self, verbose=1):
 
-        print('\n# Make Ratios')
+        #print('\n# Make Ratios')
 
         for v in self.variables:
 
@@ -1471,7 +1501,7 @@ class TreeSample(Sample):
                  usedataframeandweightfrom=False,
                  ):
 
-        print('Initializing ' + name)
+        #print('Initializing ' + name)
 
         Sample.__init__(self, category, name, title, group, color, linestyle, fillstyle, scaleby, scaleto)
 
@@ -1623,7 +1653,7 @@ class TreeSample(Sample):
 
                 self.chain.AddFriend(self.friendchain)
 
-            print(' construct dataframe')
+            #print(' construct dataframe')
 
             if eventselection is None or eventselection == '' or eventselection == '1':
                 self.df = ROOT.RDataFrame(self.chain)
