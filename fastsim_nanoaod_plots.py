@@ -26,6 +26,7 @@ basepath = [args.old]
 altpath = [args.new]
 
 vectorselection='1'
+eventselection=''
 
 pf = PlotFactory(
     outputpath=args.out,
@@ -50,13 +51,13 @@ pf.add_samples([
     TreeSample(ntestfiles=ntestfiles, category='line', name='old', title='Old',
                modifyvarname=lambda varname: varname,
                tree='Events', files=basepath,
-               eventselection='',
+               eventselection=eventselection,
                vectorselection=vectorselection,
                color=ROOT.kBlack),
 
     TreeSample(ntestfiles=ntestfiles, category='marker', name='new', title='New',
                tree='Events', files=altpath,
-               eventselection='',
+               eventselection=eventselection,
                vectorselection=vectorselection,
                color=ROOT.kBlue),
 

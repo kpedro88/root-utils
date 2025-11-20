@@ -259,15 +259,17 @@ class PlotFactory:
                     vrname = v + r
                     if r.hidden: continue
                     if self.ratiohistos[vrname] is None: continue
-                    comp[vrname] = get_contents(self.ratiohistos[vrname])
+                    comp[vrname] = [r.category, get_contents(self.ratiohistos[vrname])]
 
             valid = True
             for key,val in comp.items():
-                if not all([x==1.0 for x in val]):
+                good_val = 1.0
+                if val[0]=="diff": good_val = 0.0
+                if not all([x==good_val for x in val[1]]):
                     valid = False
                     print("Difference in {}: {}".format(
                         key,
-                        ', '.join(["{:.3g}".format(v) for v in val]),
+                        ', '.join(["{:.3g}".format(v) for v in val[1]]),
                     ))
             if not valid:
                 sys.exit(1)
@@ -488,7 +490,7 @@ class PlotFactory:
                 raise NotImplementedError('unknown sample category')
 
             for v in self.variables:
-                self.histos[v + g] = self.histos[v + self.groups[g][0]].Clone(g + v.name)
+                self.histos[v + g] = self.histos[v + self.groups[g][0]].Clone(g + v)
                 self.histos[v + g].Reset('ICESM')
                 for part in self.groups[g]:
                     if not part.scaleby == 1.:
@@ -638,7 +640,7 @@ class PlotFactory:
 
 
             if len(self.stacksamples) > 0:
-                self.stacks[v] = ROOT.THStack('stack' + v.name, '')
+                self.stacks[v] = ROOT.THStack('stack' + v, '')
                 for s in self.stacksamples:
                     if s.group is None: self.stacks[v].Add(self.histos[v + s])
 
@@ -795,12 +797,12 @@ class PlotFactory:
                     if minuend == 'STACK':
                         self.ratiohistos[v + r] = self.sums[v].Clone(v + r)
                     else:
-                        self.ratiohistos[v + r] = self.histos[v.name + minuend].Clone(v + r)
+                        self.ratiohistos[v + r] = self.histos[v + minuend].Clone(v + r)
 
                     if subtrahend == 'STACK':
                         self.ratiohistos[v + r].Add(self.sums[v], -1)
                     else:
-                        self.ratiohistos[v + r].Add(self.histos[v.name + subtrahend], -1)
+                        self.ratiohistos[v + r].Add(self.histos[v + subtrahend], -1)
 
                     self.ratiohistos[v + r].SetName(self.ratiohistos[v + r].GetName().replace(':', 'DIFF'))  # TODO: do this?
 
@@ -1069,20 +1071,20 @@ class PlotFactory:
                     self.ratiohistos[v + r].GetXaxis().SetLabelOffset(r.xaxlabeloffset)
 
                 self.ratiohistos[v + r].SetLineWidth(self.linewidth)
-                self.ratiohistos[v + r].SetLineStyle(self.histos[v.name + takestylefrom].GetLineStyle())
-                self.ratiohistos[v + r].SetLineColor(self.histos[v.name + takestylefrom].GetLineColor())
+                self.ratiohistos[v + r].SetLineStyle(self.histos[v + takestylefrom].GetLineStyle())
+                self.ratiohistos[v + r].SetLineColor(self.histos[v + takestylefrom].GetLineColor())
 
-                self.ratiohistos[v + r].SetMarkerSize(self.histos[v.name + takestylefrom].GetMarkerSize())
-                self.ratiohistos[v + r].SetMarkerColor(self.histos[v.name + takestylefrom].GetMarkerColor())
+                self.ratiohistos[v + r].SetMarkerSize(self.histos[v + takestylefrom].GetMarkerSize())
+                self.ratiohistos[v + r].SetMarkerColor(self.histos[v + takestylefrom].GetMarkerColor())
 
                 if r.category == 'efficiency':
 
                     self.ratiohistos[str(v + r) + 'eff'].SetLineWidth(self.linewidth)
-                    self.ratiohistos[str(v + r) + 'eff'].SetLineStyle(self.histos[v.name + takestylefrom].GetLineStyle())
-                    self.ratiohistos[str(v + r) + 'eff'].SetLineColor(self.histos[v.name + takestylefrom].GetLineColor())
+                    self.ratiohistos[str(v + r) + 'eff'].SetLineStyle(self.histos[v + takestylefrom].GetLineStyle())
+                    self.ratiohistos[str(v + r) + 'eff'].SetLineColor(self.histos[v + takestylefrom].GetLineColor())
 
-                    self.ratiohistos[str(v + r) + 'eff'].SetMarkerSize(self.histos[v.name + takestylefrom].GetMarkerSize())
-                    self.ratiohistos[str(v + r) + 'eff'].SetMarkerColor(self.histos[v.name + takestylefrom].GetMarkerColor())
+                    self.ratiohistos[str(v + r) + 'eff'].SetMarkerSize(self.histos[v + takestylefrom].GetMarkerSize())
+                    self.ratiohistos[str(v + r) + 'eff'].SetMarkerColor(self.histos[v + takestylefrom].GetMarkerColor())
 
                 if r.drawoptions is not None:
 
@@ -1142,7 +1144,7 @@ class PlotFactory:
 
             if self.axes == 'lin' or self.axes == 'log':
 
-                canvas = ROOT.TCanvas('c' + v.name, 'c' + v.name, self.width, self.height)
+                canvas = ROOT.TCanvas('c' + str(v), 'c' + str(v), self.width, self.height)
                 canvas.Divide(1, 1)
 
                 if len(self.ratios) > 0:
@@ -1216,7 +1218,7 @@ class PlotFactory:
 
             else:
 
-                canvas = ROOT.TCanvas('c' + v.name, 'c' + v.name, 2 * self.width, self.height)
+                canvas = ROOT.TCanvas('c' + str(v), 'c' + str(v), 2 * self.width, self.height)
                 canvas.Divide(2, 1)
 
                 if len(self.ratios) > 0:
@@ -1284,7 +1286,7 @@ class PlotFactory:
                                     if r.category == 'efficiency':
                                         self.ratiohistos[str(v + r) + 'eff'].Draw('same')
 
-                            if r.category == 'ratiowithfit' and v.name in r.ratiofitvariables:
+                            if r.category == 'ratiowithfit' and v in r.ratiofitvariables:
                                 self.ratiohistos[v + r + 'label'].Draw('same')
 
                             self.p.adjustLowerHisto(self.ratiohistos[v + r])
@@ -1321,11 +1323,11 @@ class PlotFactory:
             if type(self.outputformat) == list:
                 for outputfmt in self.outputformat:
                     canvas.Print(self.outputpath + self.outputsubfolder
-                                 + '/' + self.outputpattern.replace('VARIABLE', v.name)
+                                 + '/' + self.outputpattern.replace('VARIABLE', v.title)
                                  + '.' + outputfmt)
             else:
                 canvas.Print(self.outputpath + self.outputsubfolder
-                             + '/' + self.outputpattern.replace('VARIABLE', v.name)
+                             + '/' + self.outputpattern.replace('VARIABLE', v.title)
                              + '.' + self.outputformat)
 
     def _draw_histos(self, v, log):
@@ -1831,7 +1833,7 @@ class Variable:
         self.verbosesignificance = verbosesignificance
 
     def __str__(self):
-        return self.name
+        return self.title
 
     def __add__(self, other):
         return str(self) + str(other)
