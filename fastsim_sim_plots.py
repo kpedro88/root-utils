@@ -24,6 +24,7 @@ simvars = {
 "EcalHitsES":  ["EcalHitsES.energy()", "EcalHitsES",  (0, 0.008), 1, 100],
 "HcalHits":    ["HcalHits.energy()",   "HcalHits",    (0, 50   ), 1, 100],
 "HcalIeta":    ["HcalIeta",            "HcalIeta",    (-41.5,41.5),   1, 83],
+"HcalIetaWt":  ["HcalIeta",            "HcalIetaWt",  (-41.5,41.5),   1, 83],
 "HcalSubdet":  ["HcalSubdet",          "HcalSubdet",  (0, 8    ), 1, 8],
 "HFHits":      ["HcalHits.energy()",   "HFHits",      (0, 50   ), 1, 50],
 "MuonCSCHits": ["MuonCSCHits.perp()",  "MuonCSCHits", (0, 50   ), 1, 100],
@@ -33,7 +34,7 @@ simvars = {
 }
 
 simwts = {
-"HcalIeta": "HcalHits.energy()",
+"HcalIetaWt": "HcalHits.energy()",
 "HFHits": "HcalSubdet==4",
 }
 
@@ -149,8 +150,8 @@ pf.add_variables([
 
 # manually append weights (for TTree::Draw(...,wt,...)
 for var in pf.variables:
-    if var.name in simwts:
-        var.wt = simwts[var.name]
+    if var.title in simwts:
+        var.wt = simwts[var.title]
     else:
         var.wt = ""
 
