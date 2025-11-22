@@ -12,10 +12,15 @@ fastsim_aliases = {
 "HcalHits":   "PCaloHits_fastSimProducer_HcalHits_SIM.obj",
 "HcalIeta":   "(2*((HcalHits.detId & 0x80000)>0) - 1)*((HcalHits.detId/(2^10)) & 0x1FF)",
 "HcalSubdet": "(HcalHits.detId/(2^25))&7",
-"MuonCSCHits": "PSimHits_MuonSimHits_MuonCSCHits_SIM.obj.momentumAtEntry()",
-"MuonDTHits": "PSimHits_MuonSimHits_MuonDTHits_SIM.obj.momentumAtEntry()",
-"MuonRPCHits": "PSimHits_MuonSimHits_MuonRPCHits_SIM.obj.momentumAtEntry()",
-"TrackerHits": "PSimHits_fastSimProducer_TrackerHits_SIM.obj.momentumAtEntry()",
+}
+
+fullsim_aliases = {
+"EcalHitsEB": "PCaloHits_g4SimHits_EcalHitsEB_SIM.obj",
+"EcalHitsEE": "PCaloHits_g4SimHits_EcalHitsEE_SIM.obj",
+"EcalHitsES": "PCaloHits_g4SimHits_EcalHitsES_SIM.obj",
+"HcalHits":   "PCaloHits_g4SimHits_HcalHits_SIM.obj",
+"HcalIeta":   "(2*((HcalHits.detId/(2^20)&1)>0) - 1)*((HcalHits.detId/(2^10)) & 1023)",
+"HcalSubdet": "(HcalHits.detId/(2^28))&15",
 }
 
 simvars = {
@@ -26,10 +31,6 @@ simvars = {
 "HcalIeta":    ["HcalIeta",            "HcalIeta",    (-41.5,41.5),   1, 83],
 "HcalSubdet":  ["HcalSubdet",          "HcalSubdet",  (0, 8    ), 1, 8],
 "HFHits":      ["HcalHits.energy()",   "HFHits",      (0, 50   ), 1, 50],
-"MuonCSCHits": ["MuonCSCHits.perp()",  "MuonCSCHits", (0, 50   ), 1, 100],
-"MuonDTHits":  ["MuonDTHits.perp()",   "MuonDTHits",  (0, 100  ), 1, 100],
-"MuonRPCHits": ["MuonRPCHits.perp()",  "MuonRPCHits", (0, 100  ), 1, 100],
-"TrackerHits": ["TrackerHits.perp()",  "TrackerHits", (0, 150  ), 1, 100],
 }
 
 simwts = {
@@ -40,9 +41,9 @@ simwts = {
 import argparse
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--old", type=str, required=True, help="old file for comparison")
-parser.add_argument("--new", type=str, required=True, help="new file for comparison")
-parser.add_argument("--out", type=str, default=os.path.join(os.getcwd(),'plots_sim'), help="output dir for plots")
+parser.add_argument("--full", type=str, required=True, help="fullsim file for comparison")
+parser.add_argument("--fast", type=str, required=True, help="fastsim file for comparison")
+parser.add_argument("--out", type=str, default=os.path.join(os.getcwd(),'plots_sim_fullfast'), help="output dir for plots")
 parser.add_argument("--var", type=str, nargs='*', help="variable(s) to compare (empty: make all plots)")
 parser.add_argument("--mode", type=str, default="plot", choices=["dryrun","plot","valid"], help="mode of operation")
 parser.add_argument("--verbose", default=False, action="store_true", help="verbose printouts")
@@ -58,8 +59,8 @@ ROOT.FWLiteEnabler.enable()
 
 ntestfiles = 0
 
-basepath = [args.old]
-altpath = [args.new]
+fullpath = [args.full]
+fastpath = [args.fast]
 
 vectorselection='1'
 eventselection=''
@@ -99,7 +100,7 @@ pf = PlotFactory(
 
     normalize=False,
     ylabel='Entries',
-    ylabelratio='New/Old',
+    ylabelratio='Fast/Full',
 
     yaxisrangeratio=(0.50001, 1.49999),
     uoflowbins=True,
@@ -115,30 +116,30 @@ def set_aliases(sample, adict):
     for key,val in adict.items():
         sample.chain.SetAlias(key,val)
 
-oldsample = TreeSample(ntestfiles=ntestfiles, category='line', name='old', title='Old',
+fullsample = TreeSample(ntestfiles=ntestfiles, category='line', name='fullsim', title='FullSim',
                modifyvarname=lambda varname: varname,
-               tree='Events', files=basepath,
+               tree='Events', files=fullpath,
                eventselection=eventselection,
                vectorselection=vectorselection,
                color=ROOT.kBlack)
-set_aliases(oldsample, fastsim_aliases)
+set_aliases(fullsample, fullsim_aliases)
 
-newsample = TreeSample(ntestfiles=ntestfiles, category='marker', name='new', title='New',
-               tree='Events', files=altpath,
+fastsample = TreeSample(ntestfiles=ntestfiles, category='marker', name='fastsim', title='FastSim',
+               tree='Events', files=fastpath,
                eventselection=eventselection,
                vectorselection=vectorselection,
                color=ROOT.kBlue)
-set_aliases(newsample, fastsim_aliases)
+set_aliases(fastsample, fastsim_aliases)
 
 pf.add_samples([
-    oldsample,
-    newsample
+    fullsample,
+    fastsample
 ])
 
 ratio_cat = 'ratio'
 if args.mode=='valid': ratio_cat = 'diff'
 pf.add_ratios([
-    Ratio(category=ratio_cat, name='new:old'),
+    Ratio(category=ratio_cat, name='fastsim:fullsim'),
 ])
 
 available_vars = [v for v in simvars]
