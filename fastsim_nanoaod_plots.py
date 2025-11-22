@@ -15,6 +15,7 @@ parser.add_argument("--out", type=str, default=os.path.join(os.getcwd(),'plots')
 parser.add_argument("--var", type=str, nargs='*', help="variable(s) to compare (empty: make all plots)")
 parser.add_argument("--mode", type=str, default="plot", choices=["dryrun","plot","valid"], help="mode of operation")
 parser.add_argument("--verbose", default=False, action="store_true", help="verbose printouts")
+parser.add_argument("--full", default=False, action="store_true", help="comparison to fullsim")
 args = parser.parse_args()
 
 import ROOT
@@ -28,14 +29,23 @@ altpath = [args.new]
 vectorselection='1'
 eventselection=''
 
+oldname='Old'
+newname='New'
+rname='New/Old'
+if args.full:
+    oldname='FullSim'
+    newname='FastSim'
+    rname='Fast/Full'
+
 pf = PlotFactory(
     outputpath=args.out,
     outputpattern='VARIABLE',
     outputformat=['png'],
+    axes='log',
 
     normalize=False,
     ylabel='Entries',
-    ylabelratio='New/Old',
+    ylabelratio=rname,
 
     yaxisrangeratio=(0.50001, 1.49999),
     uoflowbins=True,
@@ -48,14 +58,14 @@ pf = PlotFactory(
 )
 
 pf.add_samples([
-    TreeSample(ntestfiles=ntestfiles, category='line', name='old', title='Old',
+    TreeSample(ntestfiles=ntestfiles, category='line', name='old', title=oldname,
                modifyvarname=lambda varname: varname,
                tree='Events', files=basepath,
                eventselection=eventselection,
                vectorselection=vectorselection,
                color=ROOT.kBlack),
 
-    TreeSample(ntestfiles=ntestfiles, category='marker', name='new', title='New',
+    TreeSample(ntestfiles=ntestfiles, category='marker', name='new', title=newname,
                tree='Events', files=altpath,
                eventselection=eventselection,
                vectorselection=vectorselection,
