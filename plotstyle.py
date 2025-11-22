@@ -142,6 +142,6 @@ class Plotstyle:
         y.SetLabelSize(factor * 0.05)
         y.SetTitleSize(factor * 0.06)
         y.SetTitleOffset(0.9 / factor)
-        y.CenterTitle()
+#        y.CenterTitle()
         y.SetNdivisions(505)
 

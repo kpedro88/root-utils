@@ -839,7 +839,7 @@ nanovariables_CMSSW_13_0_13 = {
     'PuppiMET_ptUnclustered Up': ['PuppiMET_ptUnclusteredUp', 'PuppiMET_ptUnclusteredUp', (0.0, 1000.0), 1, 50],
     'Photon_eta': ['Photon_eta', 'Photon_eta', (-3.0, 3.0), 1, 50],
     'SubJet_nCHadrons': ['SubJet_nCHadrons', 'SubJet_nCHadro ns', (0.0, 2.0), 1, 50],
-    'PuppiMET_pt': ['PuppiMET_pt', 'PuppiMET_pt', (0.0, 1000.0), 1, 50],
+    'PuppiMET_pt': ['PuppiMET_pt', 'PuppiMET_pt', (0.0, 500.0), 1, 50],
     'FatJet_particleNetLegacy_Xqq': ['FatJet_particleNetLegacy_Xqq', 'FatJet_particleNetLegacy_Xqq', (-1000.0, -1000.0), 1, 50],
     'PV_npvs': ['PV_npvs', 'PV_npvs', (1.0, 9.0), 1, 50],
     'Jet_nMuons': ['Jet_nMuons', 'Jet_nMuons', (0.0, 3.0), 1, 50],

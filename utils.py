@@ -729,16 +729,16 @@ class PlotFactory:
                     if numerator == 'STACK':
                         self.ratiohistos[v + r] = self.sums[v].Clone(v + r)
                     elif 'DIFF' in numerator:
-                        self.ratiohistos[v + r] = self.ratiohistos[v.name + 'diff' + numerator.replace('DIFF', ':')].Clone(v + r)
+                        self.ratiohistos[v + r] = self.ratiohistos[v + 'diff' + numerator.replace('DIFF', ':')].Clone(v + r)
                     else:
-                        self.ratiohistos[v + r] = self.histos[v.name + numerator].Clone(v + r)
+                        self.ratiohistos[v + r] = self.histos[v + numerator].Clone(v + r)
 
                     if denominator == 'STACK':
                         self.ratiohistos[v + r].Divide(self.sums[v])
                     elif 'DIFF' in denominator:
-                        self.ratiohistos[v + r].Divide(self.ratiohistos[v.name + 'diff' + denominator.replace('DIFF', ':')])
+                        self.ratiohistos[v + r].Divide(self.ratiohistos[v + 'diff' + denominator.replace('DIFF', ':')])
                     else:
-                        self.ratiohistos[v + r].Divide(self.histos[v.name + denominator])
+                        self.ratiohistos[v + r].Divide(self.histos[v + denominator])
 
                     self.ratiohistos[v + r].SetName(self.ratiohistos[v + r].GetName().replace(':', 'VS'))  # TODO: do this?
 
