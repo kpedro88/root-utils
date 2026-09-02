@@ -12,10 +12,11 @@ fastsim_aliases = {
 "HcalHits":   "PCaloHits_fastSimProducer_HcalHits_SIM.obj",
 "HcalIeta":   "(2*((HcalHits.detId & 0x80000)>0) - 1)*((HcalHits.detId/(2^10)) & 0x1FF)",
 "HcalSubdet": "(HcalHits.detId/(2^25))&7",
-"MuonCSCHits": "PSimHits_MuonSimHits_MuonCSCHits_SIM.obj.momentumAtEntry()",
-"MuonDTHits": "PSimHits_MuonSimHits_MuonDTHits_SIM.obj.momentumAtEntry()",
-"MuonRPCHits": "PSimHits_MuonSimHits_MuonRPCHits_SIM.obj.momentumAtEntry()",
-"TrackerHits": "PSimHits_fastSimProducer_TrackerHits_SIM.obj.momentumAtEntry()",
+"MuonCSCHits": "PSimHits_MuonSimHits_MuonCSCHits_SIM.obj",
+"MuonDTHits": "PSimHits_MuonSimHits_MuonDTHits_SIM.obj",
+"MuonRPCHits": "PSimHits_MuonSimHits_MuonRPCHits_SIM.obj",
+"MuonGEMHits": "PSimHits_MuonSimHits_MuonGEMHits_SIM.obj",
+"TrackerHits": "PSimHits_fastSimProducer_TrackerHits_SIM.obj",
 }
 
 simvars = {
@@ -27,10 +28,11 @@ simvars = {
 "HcalIetaWt":  ["HcalIeta",            "HcalIetaWt",  (-41.5,41.5),   1, 83],
 "HcalSubdet":  ["HcalSubdet",          "HcalSubdet",  (0, 8    ), 1, 8],
 "HFHits":      ["HcalHits.energy()",   "HFHits",      (0, 50   ), 1, 50],
-"MuonCSCHits": ["MuonCSCHits.perp()",  "MuonCSCHits", (0, 50   ), 1, 100],
-"MuonDTHits":  ["MuonDTHits.perp()",   "MuonDTHits",  (0, 100  ), 1, 100],
-"MuonRPCHits": ["MuonRPCHits.perp()",  "MuonRPCHits", (0, 100  ), 1, 100],
-"TrackerHits": ["TrackerHits.perp()",  "TrackerHits", (0, 150  ), 1, 100],
+"MuonCSCHits": ["MuonCSCHits.momentumAtEntry().perp()",  "MuonCSCHits", (0, 100  ), 1, 100],
+"MuonDTHits":  ["MuonDTHits.momentumAtEntry().perp()",   "MuonDTHits",  (0, 100  ), 1, 100],
+"MuonRPCHits": ["MuonRPCHits.momentumAtEntry().perp()",  "MuonRPCHits", (0, 100  ), 1, 100],
+"MuonGEMHits": ["MuonGEMHits.momentumAtEntry().perp()",  "MuonGEMHits", (0, 100  ), 1, 100],
+"TrackerHits": ["TrackerHits.momentumAtEntry().perp()",  "TrackerHits", (0, 150  ), 1, 100],
 }
 
 simwts = {
